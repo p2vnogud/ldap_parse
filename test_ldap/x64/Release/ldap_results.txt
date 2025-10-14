@@ -1,0 +1,390 @@
+﻿Entry 1:
+DN: CN=Builtin,DC=labrecon,DC=com
+  cn: Builtin
+  creationTime: 134030777276461440
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  distinguishedName: CN=Builtin,DC=labrecon,DC=com
+  forceLogoff: -9223372036854775808
+  instanceType: 0x4 = ( WRITE )
+  isCriticalSystemObject: TRUE
+  lockOutObservationWindow: -6000000000
+  lockoutDuration: -6000000000
+  lockoutThreshold: 0
+  maxPwdAge: -37108517437440
+  minPwdAge: 0
+  minPwdLength: 0
+  modifiedCount: 97
+  modifiedCountAtLastProm: 0
+  name: Builtin
+  nextRid: 1000
+  objectCategory: CN=Builtin-Domain,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; builtinDomain
+  objectGUID: 6c679852-e076-4e8b-a911-479bdd66ac13
+  objectSid: S-1-5-32
+  pwdHistoryLength: 0
+  pwdProperties: 1
+  serverState: 1
+  showInAdvancedViewOnly: FALSE
+  systemFlags: 0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )
+  uASCompat: 0
+  uSNChanged: 8200
+  uSNCreated: 8200
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 2:
+DN: CN=Computers,DC=labrecon,DC=com
+  cn: Computers
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  description: Default container for upgraded computer accounts
+  distinguishedName: CN=Computers,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  isCriticalSystemObject: TRUE
+  name: Computers
+  objectCategory: CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; container
+  objectGUID: f778a32a-8f3a-46ec-a433-a3b3d6ec8473
+  showInAdvancedViewOnly: FALSE
+  systemFlags: 0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )
+  uSNChanged: 5673
+  uSNCreated: 5673
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 3:
+DN: OU=Domain Controllers,DC=labrecon,DC=com
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  description: Default container for domain controllers
+  distinguishedName: OU=Domain Controllers,DC=labrecon,DC=com
+  gPLink: [LDAP://CN={6AC1786C-016F-11D2-945F-00C04fB984F9},CN=Policies,CN=System,DC=labrecon,DC=com;0]
+  instanceType: 0x4 = ( WRITE )
+  isCriticalSystemObject: TRUE
+  name: Domain Controllers
+  objectCategory: CN=Organizational-Unit,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; organizationalUnit
+  objectGUID: 150b3256-efa6-4712-b095-ca26ee6e8340
+  ou: Domain Controllers
+  showInAdvancedViewOnly: FALSE
+  systemFlags: 0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )
+  uSNChanged: 5816
+  uSNCreated: 5816
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 4:
+DN: CN=ForeignSecurityPrincipals,DC=labrecon,DC=com
+  cn: ForeignSecurityPrincipals
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  description: Default container for security identifiers (SIDs) associated with objects from external, trusted domains
+  distinguishedName: CN=ForeignSecurityPrincipals,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  isCriticalSystemObject: TRUE
+  name: ForeignSecurityPrincipals
+  objectCategory: CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; container
+  objectGUID: df10835d-5e3b-45e4-baf6-9a3c386e6c04
+  showInAdvancedViewOnly: FALSE
+  systemFlags: 0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )
+  uSNChanged: 5818
+  uSNCreated: 5818
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 5:
+DN: CN=Infrastructure,DC=labrecon,DC=com
+  cn: Infrastructure
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  distinguishedName: CN=Infrastructure,DC=labrecon,DC=com
+  fSMORoleOwner: CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  isCriticalSystemObject: TRUE
+  name: Infrastructure
+  objectCategory: CN=Infrastructure-Update,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; infrastructureUpdate
+  objectGUID: f1c87de6-faed-402f-a03b-1419b21e1201
+  showInAdvancedViewOnly: TRUE
+  systemFlags: 0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )
+  uSNChanged: 5817
+  uSNCreated: 5817
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 6:
+DN: CN=Keys,DC=labrecon,DC=com
+  cn: Keys
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010101000000.0Z
+  description: Default container for key objects
+  distinguishedName: CN=Keys,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  name: Keys
+  objectCategory: CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; container
+  objectGUID: d2404146-1d71-4828-a51d-1a1085307f8f
+  showInAdvancedViewOnly: TRUE
+  uSNChanged: 5824
+  uSNCreated: 5824
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 7:
+DN: CN=LostAndFound,DC=labrecon,DC=com
+  cn: LostAndFound
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  description: Default container for orphaned objects
+  distinguishedName: CN=LostAndFound,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  isCriticalSystemObject: TRUE
+  name: LostAndFound
+  objectCategory: CN=Lost-And-Found,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; lostAndFound
+  objectGUID: f0da8918-4802-46b4-9c84-d5a634b299b5
+  showInAdvancedViewOnly: TRUE
+  systemFlags: 0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )
+  uSNChanged: 5670
+  uSNCreated: 5670
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 8:
+DN: CN=Managed Service Accounts,DC=labrecon,DC=com
+  cn: Managed Service Accounts
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  description: Default container for managed service accounts
+  distinguishedName: CN=Managed Service Accounts,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  name: Managed Service Accounts
+  objectCategory: CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; container
+  objectGUID: 4278d7ee-934e-48fd-b10c-44cdc33e5750
+  showInAdvancedViewOnly: FALSE
+  uSNChanged: 5822
+  uSNCreated: 5822
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 9:
+DN: OU=Microsoft Exchange Security Groups,DC=labrecon,DC=com
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  distinguishedName: OU=Microsoft Exchange Security Groups,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  msExchEdgeSyncConfigFlags: 0
+  msExchVersion: 4535486012416
+  name: Microsoft Exchange Security Groups
+  objectCategory: CN=Organizational-Unit,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; organizationalUnit
+  objectGUID: e792474b-78ca-4be6-98c2-5032ca963ffd
+  ou: Microsoft Exchange Security Groups
+  systemFlags: 0x40000000 
+  uSNChanged: 21370
+  uSNCreated: 21233
+  whenChanged: 09/23/2025 00:58:35
+  whenCreated: 09/23/2025 00:58:35
+
+======================================================================
+
+Entry 10:
+DN: CN=Microsoft Exchange System Objects,DC=labrecon,DC=com
+  cn: Microsoft Exchange System Objects
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  distinguishedName: CN=Microsoft Exchange System Objects,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  msExchVersion: 4535486012416
+  name: Microsoft Exchange System Objects
+  objectCategory: CN=ms-Exch-System-Objects-Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (3): top; container; msExchSystemObjectsContainer
+  objectGUID: 9da5920e-d6a7-4c6e-8e25-e81eb50617ba
+  objectVersion: 13243
+  showInAdvancedViewOnly: TRUE
+  systemFlags: 0x40000000 
+  uSNChanged: 24216
+  uSNCreated: 24213
+  whenChanged: 09/23/2025 00:58:53
+  whenCreated: 09/23/2025 00:58:53
+
+======================================================================
+
+Entry 11:
+DN: CN=NTDS Quotas,DC=labrecon,DC=com
+  cn: NTDS Quotas
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  description: Quota specifications container
+  distinguishedName: CN=NTDS Quotas,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  isCriticalSystemObject: TRUE
+  msDS-TombstoneQuotaFactor: 100
+  name: NTDS Quotas
+  objectCategory: CN=ms-DS-Quota-Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; msDS-QuotaContainer
+  objectGUID: cdddb672-0429-4ffc-b5c2-80d990ebfed2
+  showInAdvancedViewOnly: TRUE
+  systemFlags: 0x80000000 = ( DISALLOW_DELETE )
+  uSNChanged: 5821
+  uSNCreated: 5821
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 12:
+DN: CN=Program Data,DC=labrecon,DC=com
+  cn: Program Data
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  description: Default location for storage of application data.
+  distinguishedName: CN=Program Data,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  name: Program Data
+  objectCategory: CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; container
+  objectGUID: 95d618aa-ddee-48c4-ac03-4d363aee62cd
+  showInAdvancedViewOnly: TRUE
+  uSNChanged: 5819
+  uSNCreated: 5819
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 13:
+DN: CN=System,DC=labrecon,DC=com
+  cn: System
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180009.0Z; 16010714223649.0Z
+  description: Builtin system settings
+  distinguishedName: CN=System,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  isCriticalSystemObject: TRUE
+  name: System
+  objectCategory: CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; container
+  objectGUID: ee0be064-0f55-4c70-b9f9-f4a41ca9b59c
+  showInAdvancedViewOnly: TRUE
+  systemFlags: 0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )
+  uSNChanged: 5674
+  uSNCreated: 5674
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 14:
+DN: CN=TPM Devices,DC=labrecon,DC=com
+  cn: TPM Devices
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 16010714223648.0Z
+  distinguishedName: CN=TPM Devices,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  name: TPM Devices
+  objectCategory: CN=ms-TPM-Information-Objects-Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; msTPM-InformationObjectsContainer
+  objectGUID: b3ec2e39-8a35-4059-88aa-787762acebbd
+  showInAdvancedViewOnly: TRUE
+  uSNChanged: 5823
+  uSNCreated: 5823
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 15:
+DN: CN=Users,DC=labrecon,DC=com
+  cn: Users
+  dSCorePropagationData (5): 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 20250922180010.0Z; 16010714223648.0Z
+  description: Default container for upgraded user accounts
+  distinguishedName: CN=Users,DC=labrecon,DC=com
+  instanceType: 0x4 = ( WRITE )
+  isCriticalSystemObject: TRUE
+  name: Users
+  objectCategory: CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; container
+  objectGUID: a323c4ae-7379-42e0-9d89-6748b1b03592
+  showInAdvancedViewOnly: FALSE
+  systemFlags: 0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )
+  uSNChanged: 5672
+  uSNCreated: 5672
+  whenChanged: 09/23/2025 00:11:20
+  whenCreated: 09/23/2025 00:11:20
+
+======================================================================
+
+Entry 16:
+DN: DC=ForestDnsZones,DC=labrecon,DC=com
+  dSASignature: { V1: DsaGuid = 0120d601-02a0-423b-95be-582629b8d616 }
+  dSCorePropagationData: 16010101000000.0Z
+  dc: ForestDnsZones
+  description: Microsoft DNS Directory
+  distinguishedName: DC=ForestDnsZones,DC=labrecon,DC=com
+  instanceType: 0xd = ( IS_NC_HEAD | WRITE )
+  msDS-NcType: 0
+  msDs-masteredBy: CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com
+  name: ForestDnsZones
+  objectCategory: CN=Domain-DNS,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (3): top; domain; domainDNS
+  objectGUID: 1dc89136-baed-419e-9e51-97a5f0fe612c
+  uSNChanged: 24254
+  uSNCreated: 12604
+  wellKnownObjects (4): B:32:6227F0AF1FC2410D8E3BB10615BB5B0F:CN=NTDS Quotas,DC=ForestDnsZones,DC=labrecon,DC=com; B:32:2FBAC1870ADE11D297C400C04FD8D5CD:CN=Infrastructure,DC=ForestDnsZones,DC=labrecon,DC=com; B:32:AB8153B7768811D1ADED00C04FD8D5CD:CN=LostAndFound,DC=ForestDnsZones,DC=labrecon,DC=com; B:32:18E2EA80684F11D2B9AA00C04F79F805:CN=Deleted Objects,DC=ForestDnsZones,DC=labrecon,DC=com
+  whenChanged: 09/23/2025 01:12:25
+  whenCreated: 09/23/2025 00:21:04
+
+======================================================================
+
+Entry 17:
+DN: DC=DomainDnsZones,DC=labrecon,DC=com
+  dSASignature: { V1: DsaGuid = 0120d601-02a0-423b-95be-582629b8d616 }
+  dSCorePropagationData: 16010101000000.0Z
+  dc: DomainDnsZones
+  description: Microsoft DNS Directory
+  distinguishedName: DC=DomainDnsZones,DC=labrecon,DC=com
+  instanceType: 0xd = ( IS_NC_HEAD | WRITE )
+  msDS-NcType: 0
+  msDs-masteredBy: CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com
+  name: DomainDnsZones
+  objectCategory: CN=Domain-DNS,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (3): top; domain; domainDNS
+  objectGUID: a4a84875-4c9b-4dfc-8330-ae39123192c8
+  uSNChanged: 24253
+  uSNCreated: 12582
+  wellKnownObjects (4): B:32:6227F0AF1FC2410D8E3BB10615BB5B0F:CN=NTDS Quotas,DC=DomainDnsZones,DC=labrecon,DC=com; B:32:2FBAC1870ADE11D297C400C04FD8D5CD:CN=Infrastructure,DC=DomainDnsZones,DC=labrecon,DC=com; B:32:AB8153B7768811D1ADED00C04FD8D5CD:CN=LostAndFound,DC=DomainDnsZones,DC=labrecon,DC=com; B:32:18E2EA80684F11D2B9AA00C04F79F805:CN=Deleted Objects,DC=DomainDnsZones,DC=labrecon,DC=com
+  whenChanged: 09/23/2025 01:12:25
+  whenCreated: 09/23/2025 00:21:04
+
+======================================================================
+
+Entry 18:
+DN: CN=Configuration,DC=labrecon,DC=com
+  cn: Configuration
+  dSASignature: { V1: DsaGuid = 0120d601-02a0-423b-95be-582629b8d616 }
+  dSCorePropagationData: 16010101000000.0Z
+  distinguishedName: CN=Configuration,DC=labrecon,DC=com
+  instanceType: 0xd = ( IS_NC_HEAD | WRITE )
+  masteredBy: CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com
+  msDS-NcType: 0
+  msDs-masteredBy: CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com
+  name: Configuration
+  objectCategory: CN=Configuration,CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  objectClass (2): top; configuration
+  objectGUID: fb42b75f-1e78-4254-8de6-93ec71996a0b
+  showInAdvancedViewOnly: TRUE
+  subRefs: CN=Schema,CN=Configuration,DC=labrecon,DC=com
+  uSNChanged: 24251
+  uSNCreated: 4101
+  wellKnownObjects (3): B:32:6227F0AF1FC2410D8E3BB10615BB5B0F:CN=NTDS Quotas,CN=Configuration,DC=labrecon,DC=com; B:32:AB8153B7768811D1ADED00C04FD8D5CD:CN=LostAndFoundConfig,CN=Configuration,DC=labrecon,DC=com; B:32:18E2EA80684F11D2B9AA00C04F79F805:CN=Deleted Objects,CN=Configuration,DC=labrecon,DC=com
+  whenChanged: 09/23/2025 01:12:25
+  whenCreated: 09/23/2025 00:11:13
+
+======================================================================
+

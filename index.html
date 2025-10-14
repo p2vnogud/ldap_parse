@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Viewer Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            opacity: 0.95;
+            font-size: 1.2em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-section {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 50px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            background: linear-gradient(135deg, #f0f2ff 0%, #e8ebff 100%);
+            border-color: #764ba2;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .upload-area.dragover {
+            background: linear-gradient(135deg, #e8ebff 0%, #dde0ff 100%);
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .controls-panel {
+            padding: 25px 40px;
+            background: #f8f9ff;
+            border-bottom: 2px solid #e0e0e0;
+            display: none;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .select-box {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 15px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 180px;
+        }
+
+        .select-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .stats-panel {
+            padding: 20px 40px;
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            display: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        .table-container {
+            padding: 30px 40px;
+            display: none;
+        }
+
+        .table-wrapper {
+            border-radius: 15px;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        th.sortable::after {
+            content: '⇅';
+            margin-left: 8px;
+            opacity: 0.5;
+        }
+
+        th.sorted-asc::after {
+            content: '↑';
+            opacity: 1;
+        }
+
+        th.sorted-desc::after {
+            content: '↓';
+            opacity: 1;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        tbody tr {
+            transition: all 0.2s;
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+            transform: scale(1.01);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.1);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #fff59d 0%, #fff176 100%);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 6em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 25px;
+            padding: 20px;
+        }
+
+        .page-btn {
+            padding: 10px 18px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .page-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            position: relative;
+            background: white;
+            margin: 50px auto;
+            padding: 40px;
+            width: 90%;
+            max-width: 900px;
+            border-radius: 20px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideDown 0.4s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 35px;
+            cursor: pointer;
+            color: #999;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #667eea;
+            transform: rotate(90deg);
+        }
+
+        .stats-detail {
+            margin-top: 20px;
+        }
+
+        .column-stats {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .column-stats h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .controls-row {
+                flex-direction: column;
+            }
+
+            .search-box,
+            .select-box {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 CSV Viewer Pro</h1>
+            <p>Công cụ phân tích và xem CSV chuyên nghiệp</p>
+        </div>
+
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <h2>Kéo thả file CSV vào đây</h2>
+                <p style="margin: 20px 0; color: #666;">hoặc</p>
+                <button class="btn" onclick="document.getElementById('fileInput').click()">
+                    Chọn File CSV
+                </button>
+                <input type="file" id="fileInput" class="file-input" accept=".csv">
+            </div>
+        </div>
+
+        <div class="controls-panel" id="controlsPanel">
+            <div class="controls-row">
+                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Tìm kiếm trong bảng...">
+                <select class="select-box" id="columnFilter">
+                    <option value="">Tất cả cột</option>
+                </select>
+                <select class="select-box" id="rowsPerPage">
+                    <option value="25">25 dòng</option>
+                    <option value="50">50 dòng</option>
+                    <option value="100" selected>100 dòng</option>
+                    <option value="500">500 dòng</option>
+                    <option value="-1">Tất cả</option>
+                </select>
+            </div>
+            <div class="controls-row">
+                <button class="action-btn btn-info" onclick="showStatistics()">📊 Thống kê chi tiết</button>
+                <button class="action-btn btn-success" onclick="exportCSV()">💾 Xuất CSV</button>
+                <button class="action-btn btn-warning" onclick="exportJSON()">📄 Xuất JSON</button>
+                <button class="action-btn btn-primary" onclick="clearFilter()">🔄 Reset lọc</button>
+                <button class="action-btn" onclick="loadNewFile()">📁 File mới</button>
+            </div>
+        </div>
+
+        <div class="stats-panel" id="statsPanel">
+            <div class="stats-grid" id="statsGrid"></div>
+        </div>
+
+        <div class="table-container" id="tableContainer">
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="statsModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h2 style="color: #667eea; margin-bottom: 20px;">📊 Thống kê chi tiết</h2>
+            <div id="detailedStats"></div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        let rowsPerPage = 100;
+        let sortColumn = -1;
+        let sortAsc = true;
+        let headers = [];
+        let fileName = '';
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const controlsPanel = document.getElementById('controlsPanel');
+        const statsPanel = document.getElementById('statsPanel');
+        const tableContainer = document.getElementById('tableContainer');
+        const searchBox = document.getElementById('searchBox');
+        const columnFilter = document.getElementById('columnFilter');
+        const rowsPerPageSelect = document.getElementById('rowsPerPage');
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        searchBox.addEventListener('input', filterTable);
+        columnFilter.addEventListener('change', filterTable);
+        rowsPerPageSelect.addEventListener('change', (e) => {
+            rowsPerPage = parseInt(e.target.value);
+            currentPage = 1;
+            renderTable();
+        });
+
+        function handleFile(file) {
+            if (!file.name.endsWith('.csv')) {
+                alert('❌ Vui lòng chọn file CSV!');
+                return;
+            }
+
+            fileName = file.name;
+            showLoading();
+
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: true,
+                complete: function (results) {
+                    allData = results.data;
+                    headers = Object.keys(allData[0] || {});
+                    filteredData = [...allData];
+                    initializeUI();
+                },
+                error: function (error) {
+                    alert('❌ Lỗi khi đọc file: ' + error.message);
+                    hideLoading();
+                }
+            });
+        }
+
+        function showLoading() {
+            uploadSection.innerHTML = '<div class="loading"><div class="spinner"></div><p>Đang tải dữ liệu...</p></div>';
+        }
+
+        function hideLoading() {
+            uploadSection.style.display = 'none';
+        }
+
+        function initializeUI() {
+            hideLoading();
+            controlsPanel.style.display = 'block';
+            statsPanel.style.display = 'block';
+            tableContainer.style.display = 'block';
+
+            populateColumnFilter();
+            updateQuickStats();
+            renderTable();
+        }
+
+        function populateColumnFilter() {
+            columnFilter.innerHTML = '<option value="">Tất cả cột</option>';
+            headers.forEach(header => {
+                columnFilter.innerHTML += `<option value="${header}">${header}</option>`;
+            });
+        }
+
+        function updateQuickStats() {
+            const uniqueValues = {};
+            const numericCols = {};
+
+            headers.forEach(header => {
+                uniqueValues[header] = new Set();
+                numericCols[header] = [];
+            });
+
+            allData.forEach(row => {
+                headers.forEach(header => {
+                    const val = row[header];
+                    if (val !== null && val !== undefined && val !== '') {
+                        uniqueValues[header].add(val);
+                        if (typeof val === 'number') {
+                            numericCols[header].push(val);
+                        }
+                    }
+                });
+            });
+
+            let statsHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">📄 Tên File</div>
+                    <div class="stat-value" style="font-size: 18px;">${fileName}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">📊 Tổng số dòng</div>
+                    <div class="stat-value">${allData.length.toLocaleString()}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">📋 Số cột</div>
+                    <div class="stat-value">${headers.length}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🔍 Đang hiển thị</div>
+                    <div class="stat-value">${filteredData.length.toLocaleString()}</div>
+                </div>
+            `;
+
+            document.getElementById('statsGrid').innerHTML = statsHTML;
+        }
+
+        function renderTable() {
+            const start = rowsPerPage === -1 ? 0 : (currentPage - 1) * rowsPerPage;
+            const end = rowsPerPage === -1 ? filteredData.length : start + rowsPerPage;
+            const pageData = filteredData.slice(start, end);
+
+            // Render header
+            let headerHTML = '<tr>';
+            headers.forEach((header, idx) => {
+                const sortClass = sortColumn === idx ? (sortAsc ? 'sorted-asc' : 'sorted-desc') : '';
+                headerHTML += `<th class="sortable ${sortClass}" onclick="sortTable(${idx})">${header}</th>`;
+            });
+            headerHTML += '</tr>';
+            document.getElementById('tableHead').innerHTML = headerHTML;
+
+            // Render body
+            if (pageData.length === 0) {
+                document.getElementById('tableBody').innerHTML = `
+                    <tr><td colspan="${headers.length}">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔍</div>
+                            <h2>Không tìm thấy kết quả</h2>
+                            <p>Thử thay đổi từ khóa tìm kiếm</p>
+                        </div>
+                    </td></tr>
+                `;
+            } else {
+                let bodyHTML = '';
+                const searchTerm = searchBox.value.toLowerCase();
+
+                pageData.forEach(row => {
+                    bodyHTML += '<tr>';
+                    headers.forEach(header => {
+                        let value = row[header];
+                        if (value === null || value === undefined) value = '';
+                        let displayValue = String(value);
+
+                        if (searchTerm && displayValue.toLowerCase().includes(searchTerm)) {
+                            const regex = new RegExp(`(${searchTerm})`, 'gi');
+                            displayValue = displayValue.replace(regex, '<span class="highlight">$1</span>');
+                        }
+
+                        bodyHTML += `<td>${displayValue}</td>`;
+                    });
+                    bodyHTML += '</tr>';
+                });
+                document.getElementById('tableBody').innerHTML = bodyHTML;
+            }
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            if (rowsPerPage === -1) {
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            let paginationHTML = '';
+
+            paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>◀</button>`;
+
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+
+            if (startPage > 1) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(1)">1</button>`;
+                if (startPage > 2) paginationHTML += `<span style="padding: 0 10px;">...</span>`;
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) paginationHTML += `<span style="padding: 0 10px;">...</span>`;
+                paginationHTML += `<button class="page-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+
+            paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>`;
+
+            document.getElementById('pagination').innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderTable();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function sortTable(colIdx) {
+            if (sortColumn === colIdx) {
+                sortAsc = !sortAsc;
+            } else {
+                sortColumn = colIdx;
+                sortAsc = true;
+            }
+
+            const header = headers[colIdx];
+            filteredData.sort((a, b) => {
+                let valA = a[header];
+                let valB = b[header];
+
+                if (valA === null || valA === undefined) valA = '';
+                if (valB === null || valB === undefined) valB = '';
+
+                if (typeof valA === 'number' && typeof valB === 'number') {
+                    return sortAsc ? valA - valB : valB - valA;
+                }
+
+                const strA = String(valA).toLowerCase();
+                const strB = String(valB).toLowerCase();
+
+                if (sortAsc) {
+                    return strA.localeCompare(strB);
+                } else {
+                    return strB.localeCompare(strA);
+                }
+            });
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        function filterTable() {
+            const searchTerm = searchBox.value.toLowerCase();
+            const column = columnFilter.value;
+
+            if (!searchTerm) {
+                filteredData = [...allData];
+            } else {
+                filteredData = allData.filter(row => {
+                    if (column) {
+                        const value = String(row[column] || '').toLowerCase();
+                        return value.includes(searchTerm);
+                    } else {
+                        return headers.some(header => {
+                            const value = String(row[header] || '').toLowerCase();
+                            return value.includes(searchTerm);
+                        });
+                    }
+                });
+            }
+
+            currentPage = 1;
+            updateQuickStats();
+            renderTable();
+        }
+
+        function clearFilter() {
+            searchBox.value = '';
+            columnFilter.value = '';
+            filterTable();
+        }
+
+        function showStatistics() {
+            let statsHTML = '';
+
+            headers.forEach(header => {
+                const values = allData.map(row => row[header]).filter(v => v !== null && v !== undefined && v !== '');
+                const uniqueValues = [...new Set(values)];
+                const numericValues = values.filter(v => typeof v === 'number');
+
+                statsHTML += `<div class="column-stats">`;
+                statsHTML += `<h3>📊 ${header}</h3>`;
+                statsHTML += `<div class="stat-row"><span>Tổng số giá trị:</span><strong>${values.length}</strong></div>`;
+                statsHTML += `<div class="stat-row"><span>Giá trị duy nhất:</span><strong>${uniqueValues.length}</strong></div>`;
+                statsHTML += `<div class="stat-row"><span>Giá trị rỗng:</span><strong>${allData.length - values.length}</strong></div>`;
+
+                if (numericValues.length > 0) {
+                    const sum = numericValues.reduce((a, b) => a + b, 0);
+                    const avg = sum / numericValues.length;
+                    const min = Math.min(...numericValues);
+                    const max = Math.max(...numericValues);
+                    const sorted = [...numericValues].sort((a, b) => a - b);
+                    const median = sorted[Math.floor(sorted.length / 2)];
+
+                    statsHTML += `<div class="stat-row"><span>Kiểu dữ liệu:</span><strong>Số</strong></div>`;
+                    statsHTML += `<div class="stat-row"><span>Min:</span><strong>${min.toLocaleString()}</strong></div>`;
+                    statsHTML += `<div class="stat-row"><span>Max:</span><strong>${max.toLocaleString()}</strong></div>`;
+                    statsHTML += `<div class="stat-row"><span>Trung bình:</span><strong>${avg.toFixed(2)}</strong></div>`;
+                    statsHTML += `<div class="stat-row"><span>Trung vị:</span><strong>${median.toLocaleString()}</strong></div>`;
+                    statsHTML += `<div class="stat-row"><span>Tổng:</span><strong>${sum.toLocaleString()}</strong></div>`;
+                } else {
+                    statsHTML += `<div class="stat-row"><span>Kiểu dữ liệu:</span><strong>Văn bản</strong></div>`;
+                }
+
+                // Most common values
+                if (uniqueValues.length > 0 && uniqueValues.length <= 50) {
+                    const frequency = {};
+                    values.forEach(v => {
+                        frequency[v] = (frequency[v] || 0) + 1;
+                    });
+                    const sorted = Object.entries(frequency).sort((a, b) => b[1] - a[1]);
+                    const top5 = sorted.slice(0, 5);
+
+                    statsHTML += `<div class="stat-row"><span>Top giá trị phổ biến:</span><strong></strong></div>`;
+                    top5.forEach(([val, count]) => {
+                        const percentage = ((count / values.length) * 100).toFixed(1);
+                        statsHTML += `<div class="stat-row" style="padding-left: 20px;"><span>• ${val}</span><strong>${count} (${percentage}%)</strong></div>`;
+                    });
+                }
+
+                statsHTML += `</div>`;
+            });
+
+            document.getElementById('detailedStats').innerHTML = statsHTML;
+            document.getElementById('statsModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('statsModal').style.display = 'none';
+        }
+
+        function exportCSV() {
+            if (filteredData.length === 0) {
+                alert('❌ Không có dữ liệu để xuất!');
+                return;
+            }
+
+            let csv = headers.join(',') + '\n';
+
+            filteredData.forEach(row => {
+                const rowData = headers.map(header => {
+                    let value = row[header];
+                    if (value === null || value === undefined) value = '';
+                    value = String(value);
+
+                    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                        value = '"' + value.replace(/"/g, '""') + '"';
+                    }
+                    return value;
+                });
+                csv += rowData.join(',') + '\n';
+            });
+
+            downloadFile(csv, `${fileName.replace('.csv', '')}_filtered.csv`, 'text/csv');
+        }
+
+        function exportJSON() {
+            if (filteredData.length === 0) {
+                alert('❌ Không có dữ liệu để xuất!');
+                return;
+            }
+
+            const json = JSON.stringify(filteredData, null, 2);
+            downloadFile(json, `${fileName.replace('.csv', '')}.json`, 'application/json');
+        }
+
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert('✅ File đã được tải xuống thành công!');
+        }
+
+        function loadNewFile() {
+            if (confirm('⚠️ Bạn có chắc muốn tải file mới? Dữ liệu hiện tại sẽ bị xóa.')) {
+                location.reload();
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('statsModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'f') {
+                    e.preventDefault();
+                    searchBox.focus();
+                } else if (e.key === 's') {
+                    e.preventDefault();
+                    exportCSV();
+                } else if (e.key === 'r') {
+                    e.preventDefault();
+                    clearFilter();
+                }
+            } else if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

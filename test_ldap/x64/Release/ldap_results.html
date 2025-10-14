@@ -1,0 +1,1592 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDAP Query Results - Advanced View</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
+        .header h1 {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        .stats-bar {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+            color: #4a5568;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stat-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            min-width: 40px;
+            text-align: center;
+        }
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            min-height: 0;
+        }
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .sidebar h2 {
+            font-size: 18px;
+            color: #2d3748;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sidebar h3 {
+            font-size: 14px;
+            color: #4a5568;
+            margin: 15px 0 8px 0;
+            font-weight: 600;
+        }
+        .stat-list {
+            list-style: none;
+        }
+        .stat-list li {
+            padding: 8px 0;
+            font-size: 13px;
+            color: #4a5568;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f7fafc;
+        }
+        .stat-list li:last-child {
+            border-bottom: none;
+        }
+        .stat-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            margin-right: 10px;
+        }
+        .stat-count {
+            background: #edf2f7;
+            color: #2d3748;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .main-content {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .search-toolbar {
+            padding: 15px 20px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #cbd5e0;
+            font-size: 18px;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .filter-btn:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        .table-wrapper {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        th {
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        th:hover {
+            background: #edf2f7;
+        }
+        th.sortable:after {
+            content: ' ?';
+            opacity: 0.3;
+        }
+        th.sort-asc:after {
+            content: ' ?';
+            opacity: 1;
+        }
+        th.sort-desc:after {
+            content: ' ?';
+            opacity: 1;
+        }
+        th:first-child {
+            width: 50px;
+            text-align: center;
+        }
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f7fafc;
+            color: #4a5568;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        td:first-child {
+            text-align: center;
+            color: #a0aec0;
+            font-weight: 600;
+        }
+        tbody tr {
+            transition: all 0.2s;
+        }
+        tbody tr:hover {
+            background: linear-gradient(90deg, #f7fafc 0%, #edf2f7 100%);
+            transform: scale(1.001);
+        }
+        .dn-cell {
+            max-width: 400px;
+            color: #667eea;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .dn-cell:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 80px 20px;
+            color: #a0aec0;
+        }
+        .no-results svg {
+            width: 80px;
+            height: 80px;
+            opacity: 0.3;
+            margin-bottom: 20px;
+        }
+        .no-results h3 {
+            font-size: 20px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+        .no-results p {
+            font-size: 14px;
+        }
+        .export-buttons {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e2e8f0;
+        }
+        .export-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .export-btn:hover {
+            transform: translateY(-2px);
+        }
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f7fafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 250px;
+            }
+        }
+        @media (max-width: 900px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1>LDAP Query Results</h1>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span>Total:</span>
+                    <span class="stat-badge" id="totalEntries">18</span>
+                </div>
+                <div class="stat-item">
+                    <span>Attributes:</span>
+                    <span class="stat-badge">46</span>
+                </div>
+                <div class="stat-item">
+                    <span>Visible:</span>
+                    <span class="stat-badge" id="visibleCount">18</span>
+                </div>
+                <div class="stat-item">
+                    <span>Selected:</span>
+                    <span class="stat-badge" id="selectedCount">0</span>
+                </div>
+            </div>
+        </div>
+        <div class="content-wrapper">
+            <div class="sidebar">
+                <h2>Statistics</h2>
+                <div class="stat-item" style="margin-bottom: 10px;">
+                    <span style="color: #2d3748; font-weight: 600;">Total Records:</span>
+                    <span class="stat-count">18</span>
+                </div>
+                <h3>Object Classes</h3>
+                <ul class="stat-list">
+                    <li><span class='stat-name' title='top'>top</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='container'>container</span><span class='stat-count'>8</span></li>
+                    <li><span class='stat-name' title='domain'>domain</span><span class='stat-count'>2</span></li>
+                    <li><span class='stat-name' title='domainDNS'>domainDNS</span><span class='stat-count'>2</span></li>
+                    <li><span class='stat-name' title='organizationalUnit'>organizationalUnit</span><span class='stat-count'>2</span></li>
+                    <li><span class='stat-name' title='builtinDomain'>builtinDomain</span><span class='stat-count'>1</span></li>
+                    <li><span class='stat-name' title='configuration'>configuration</span><span class='stat-count'>1</span></li>
+                    <li><span class='stat-name' title='infrastructureUpdate'>infrastructureUpdate</span><span class='stat-count'>1</span></li>
+                    <li><span class='stat-name' title='lostAndFound'>lostAndFound</span><span class='stat-count'>1</span></li>
+                    <li><span class='stat-name' title='msDS-QuotaContainer'>msDS-QuotaContainer</span><span class='stat-count'>1</span></li>
+                    <li><span class='stat-name' title='msExchSystemObjectsContainer'>msExchSystemObjectsContainer</span><span class='stat-count'>1</span></li>
+                    <li><span class='stat-name' title='msTPM-InformationObjectsContainer'>msTPM-InformationObjectsContainer</span><span class='stat-count'>1</span></li>
+                </ul>
+                <h3>Top Attributes</h3>
+                <ul class="stat-list">
+                    <li><span class='stat-name' title='instanceType'>instanceType</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='whenCreated'>whenCreated</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='dSCorePropagationData'>dSCorePropagationData</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='objectCategory'>objectCategory</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='distinguishedName'>distinguishedName</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='objectGUID'>objectGUID</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='objectClass'>objectClass</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='name'>name</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='whenChanged'>whenChanged</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='uSNCreated'>uSNCreated</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='uSNChanged'>uSNChanged</span><span class='stat-count'>18</span></li>
+                    <li><span class='stat-name' title='showInAdvancedViewOnly'>showInAdvancedViewOnly</span><span class='stat-count'>15</span></li>
+                    <li><span class='stat-name' title='cn'>cn</span><span class='stat-count'>14</span></li>
+                    <li><span class='stat-name' title='description'>description</span><span class='stat-count'>12</span></li>
+                    <li><span class='stat-name' title='systemFlags'>systemFlags</span><span class='stat-count'>11</span></li>
+                </ul>
+                <div class="export-buttons">
+                    <h3>Export Visible</h3>
+                    <button class="export-btn" onclick="exportToCSV()">?? CSV</button>
+                    <button class="export-btn" onclick="exportToJSON()">?? JSON</button>
+                    <button class="export-btn" onclick="copySelected()">?? Copy</button>
+                </div>
+            </div>
+            <div class="main-content">
+                <div class="search-toolbar">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="?? Search by DN or any attribute value...">
+                        <span class="search-icon">?</span>
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="user">Users</button>
+                        <button class="filter-btn" data-filter="group">Groups</button>
+                        <button class="filter-btn" data-filter="computer">Computers</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th class="sortable" data-column="dn">DN</th>
+                                <th class="sortable" data-column="2">cn</th>
+                                <th class="sortable" data-column="3">creationTime</th>
+                                <th class="sortable" data-column="4">dSASignature</th>
+                                <th class="sortable" data-column="5">dSCorePropagationData</th>
+                                <th class="sortable" data-column="6">dc</th>
+                                <th class="sortable" data-column="7">description</th>
+                                <th class="sortable" data-column="8">distinguishedName</th>
+                                <th class="sortable" data-column="9">fSMORoleOwner</th>
+                                <th class="sortable" data-column="10">forceLogoff</th>
+                                <th class="sortable" data-column="11">gPLink</th>
+                                <th class="sortable" data-column="12">instanceType</th>
+                                <th class="sortable" data-column="13">isCriticalSystemObject</th>
+                                <th class="sortable" data-column="14">lockOutObservationWindow</th>
+                                <th class="sortable" data-column="15">lockoutDuration</th>
+                                <th class="sortable" data-column="16">lockoutThreshold</th>
+                                <th class="sortable" data-column="17">masteredBy</th>
+                                <th class="sortable" data-column="18">maxPwdAge</th>
+                                <th class="sortable" data-column="19">minPwdAge</th>
+                                <th class="sortable" data-column="20">minPwdLength</th>
+                                <th class="sortable" data-column="21">modifiedCount</th>
+                                <th class="sortable" data-column="22">modifiedCountAtLastProm</th>
+                                <th class="sortable" data-column="23">msDS-NcType</th>
+                                <th class="sortable" data-column="24">msDS-TombstoneQuotaFactor</th>
+                                <th class="sortable" data-column="25">msDs-masteredBy</th>
+                                <th class="sortable" data-column="26">msExchEdgeSyncConfigFlags</th>
+                                <th class="sortable" data-column="27">msExchVersion</th>
+                                <th class="sortable" data-column="28">name</th>
+                                <th class="sortable" data-column="29">nextRid</th>
+                                <th class="sortable" data-column="30">objectCategory</th>
+                                <th class="sortable" data-column="31">objectClass</th>
+                                <th class="sortable" data-column="32">objectGUID</th>
+                                <th class="sortable" data-column="33">objectSid</th>
+                                <th class="sortable" data-column="34">objectVersion</th>
+                                <th class="sortable" data-column="35">ou</th>
+                                <th class="sortable" data-column="36">pwdHistoryLength</th>
+                                <th class="sortable" data-column="37">pwdProperties</th>
+                                <th class="sortable" data-column="38">serverState</th>
+                                <th class="sortable" data-column="39">showInAdvancedViewOnly</th>
+                                <th class="sortable" data-column="40">subRefs</th>
+                                <th class="sortable" data-column="41">systemFlags</th>
+                                <th class="sortable" data-column="42">uASCompat</th>
+                                <th class="sortable" data-column="43">uSNChanged</th>
+                                <th class="sortable" data-column="44">uSNCreated</th>
+                                <th class="sortable" data-column="45">wellKnownObjects</th>
+                                <th class="sortable" data-column="46">whenChanged</th>
+                                <th class="sortable" data-column="47">whenCreated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-type="unknown" data-index="0">
+                                <td>1</td>
+                                <td class="dn-cell" title="CN=Builtin,DC=labrecon,DC=com">CN=Builtin,DC=labrecon,DC=com</td>
+                                <td title="Builtin">Builtin</td>
+                                <td title="134030777276461440">134030777276461440</td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="CN=Builtin,DC=labrecon,DC=com">CN=Builtin,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title="-9223372036854775808">-9223372036854775808</td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title="TRUE">TRUE</td>
+                                <td title="-6000000000">-6000000000</td>
+                                <td title="-6000000000">-6000000000</td>
+                                <td title="0">0</td>
+                                <td title=""></td>
+                                <td title="-37108517437440">-37108517437440</td>
+                                <td title="0">0</td>
+                                <td title="0">0</td>
+                                <td title="97">97</td>
+                                <td title="0">0</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="Builtin">Builtin</td>
+                                <td title="1000">1000</td>
+                                <td title="CN=Builtin-Domain,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Builtin-Domain,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | builtinDomain">top | builtinDomain</td>
+                                <td title="6c679852-e076-4e8b-a911-479bdd66ac13">6c679852-e076-4e8b-a911-479bdd66ac13</td>
+                                <td title="S-1-5-32">S-1-5-32</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0">0</td>
+                                <td title="1">1</td>
+                                <td title="1">1</td>
+                                <td title="FALSE">FALSE</td>
+                                <td title=""></td>
+                                <td title="0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )">0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )</td>
+                                <td title="0">0</td>
+                                <td title="8200">8200</td>
+                                <td title="8200">8200</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="1">
+                                <td>2</td>
+                                <td class="dn-cell" title="CN=Computers,DC=labrecon,DC=com">CN=Computers,DC=labrecon,DC=com</td>
+                                <td title="Computers">Computers</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title="Default container for upgraded computer accounts">Default container for upgraded computer accounts</td>
+                                <td title="CN=Computers,DC=labrecon,DC=com">CN=Computers,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="Computers">Computers</td>
+                                <td title=""></td>
+                                <td title="CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | container">top | container</td>
+                                <td title="f778a32a-8f3a-46ec-a433-a3b3d6ec8473">f778a32a-8f3a-46ec-a433-a3b3d6ec8473</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="FALSE">FALSE</td>
+                                <td title=""></td>
+                                <td title="0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )">0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )</td>
+                                <td title=""></td>
+                                <td title="5673">5673</td>
+                                <td title="5673">5673</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="2">
+                                <td>3</td>
+                                <td class="dn-cell" title="OU=Domain Controllers,DC=labrecon,DC=com">OU=Domain Controllers,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title="Default container for domain controllers">Default container for domain controllers</td>
+                                <td title="OU=Domain Controllers,DC=labrecon,DC=com">OU=Domain Controllers,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="[LDAP://CN={6AC1786C-016F-11D2-945F-00C04fB984F9},CN=Policies,CN=System,DC=labrecon,DC=com;0]">[LDAP://CN={6AC1786C-016F-11D2-945F-00C04fB984F9},CN=Policies,CN=System,DC=labrecon,DC=com;0]</td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="Domain Controllers">Domain Controllers</td>
+                                <td title=""></td>
+                                <td title="CN=Organizational-Unit,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Organizational-Unit,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | organizationalUnit">top | organizationalUnit</td>
+                                <td title="150b3256-efa6-4712-b095-ca26ee6e8340">150b3256-efa6-4712-b095-ca26ee6e8340</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="Domain Controllers">Domain Controllers</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="FALSE">FALSE</td>
+                                <td title=""></td>
+                                <td title="0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )">0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )</td>
+                                <td title=""></td>
+                                <td title="5816">5816</td>
+                                <td title="5816">5816</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="3">
+                                <td>4</td>
+                                <td class="dn-cell" title="CN=ForeignSecurityPrincipals,DC=labrecon,DC=com">CN=ForeignSecurityPrincipals,DC=labrecon,DC=com</td>
+                                <td title="ForeignSecurityPrincipals">ForeignSecurityPrincipals</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title="Default container for security identifiers (SIDs) associated with objects from external, trusted domains">Default container for security identifiers (SIDs) associated with objects from external, trusted domains</td>
+                                <td title="CN=ForeignSecurityPrincipals,DC=labrecon,DC=com">CN=ForeignSecurityPrincipals,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="ForeignSecurityPrincipals">ForeignSecurityPrincipals</td>
+                                <td title=""></td>
+                                <td title="CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | container">top | container</td>
+                                <td title="df10835d-5e3b-45e4-baf6-9a3c386e6c04">df10835d-5e3b-45e4-baf6-9a3c386e6c04</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="FALSE">FALSE</td>
+                                <td title=""></td>
+                                <td title="0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )">0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )</td>
+                                <td title=""></td>
+                                <td title="5818">5818</td>
+                                <td title="5818">5818</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="4">
+                                <td>5</td>
+                                <td class="dn-cell" title="CN=Infrastructure,DC=labrecon,DC=com">CN=Infrastructure,DC=labrecon,DC=com</td>
+                                <td title="Infrastructure">Infrastructure</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="CN=Infrastructure,DC=labrecon,DC=com">CN=Infrastructure,DC=labrecon,DC=com</td>
+                                <td title="CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com">CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="Infrastructure">Infrastructure</td>
+                                <td title=""></td>
+                                <td title="CN=Infrastructure-Update,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Infrastructure-Update,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | infrastructureUpdate">top | infrastructureUpdate</td>
+                                <td title="f1c87de6-faed-402f-a03b-1419b21e1201">f1c87de6-faed-402f-a03b-1419b21e1201</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title="0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )">0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )</td>
+                                <td title=""></td>
+                                <td title="5817">5817</td>
+                                <td title="5817">5817</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="5">
+                                <td>6</td>
+                                <td class="dn-cell" title="CN=Keys,DC=labrecon,DC=com">CN=Keys,DC=labrecon,DC=com</td>
+                                <td title="Keys">Keys</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010101000000.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010101000000.0Z</td>
+                                <td title=""></td>
+                                <td title="Default container for key objects">Default container for key objects</td>
+                                <td title="CN=Keys,DC=labrecon,DC=com">CN=Keys,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="Keys">Keys</td>
+                                <td title=""></td>
+                                <td title="CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | container">top | container</td>
+                                <td title="d2404146-1d71-4828-a51d-1a1085307f8f">d2404146-1d71-4828-a51d-1a1085307f8f</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="5824">5824</td>
+                                <td title="5824">5824</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="6">
+                                <td>7</td>
+                                <td class="dn-cell" title="CN=LostAndFound,DC=labrecon,DC=com">CN=LostAndFound,DC=labrecon,DC=com</td>
+                                <td title="LostAndFound">LostAndFound</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title="Default container for orphaned objects">Default container for orphaned objects</td>
+                                <td title="CN=LostAndFound,DC=labrecon,DC=com">CN=LostAndFound,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="LostAndFound">LostAndFound</td>
+                                <td title=""></td>
+                                <td title="CN=Lost-And-Found,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Lost-And-Found,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | lostAndFound">top | lostAndFound</td>
+                                <td title="f0da8918-4802-46b4-9c84-d5a634b299b5">f0da8918-4802-46b4-9c84-d5a634b299b5</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title="0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )">0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )</td>
+                                <td title=""></td>
+                                <td title="5670">5670</td>
+                                <td title="5670">5670</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="7">
+                                <td>8</td>
+                                <td class="dn-cell" title="CN=Managed Service Accounts,DC=labrecon,DC=com">CN=Managed Service Accounts,DC=labrecon,DC=com</td>
+                                <td title="Managed Service Accounts">Managed Service Accounts</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title="Default container for managed service accounts">Default container for managed service accounts</td>
+                                <td title="CN=Managed Service Accounts,DC=labrecon,DC=com">CN=Managed Service Accounts,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="Managed Service Accounts">Managed Service Accounts</td>
+                                <td title=""></td>
+                                <td title="CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | container">top | container</td>
+                                <td title="4278d7ee-934e-48fd-b10c-44cdc33e5750">4278d7ee-934e-48fd-b10c-44cdc33e5750</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="FALSE">FALSE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="5822">5822</td>
+                                <td title="5822">5822</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="8">
+                                <td>9</td>
+                                <td class="dn-cell" title="OU=Microsoft Exchange Security Groups,DC=labrecon,DC=com">OU=Microsoft Exchange Security Groups,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="OU=Microsoft Exchange Security Groups,DC=labrecon,DC=com">OU=Microsoft Exchange Security Groups,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0">0</td>
+                                <td title="4535486012416">4535486012416</td>
+                                <td title="Microsoft Exchange Security Groups">Microsoft Exchange Security Groups</td>
+                                <td title=""></td>
+                                <td title="CN=Organizational-Unit,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Organizational-Unit,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | organizationalUnit">top | organizationalUnit</td>
+                                <td title="e792474b-78ca-4be6-98c2-5032ca963ffd">e792474b-78ca-4be6-98c2-5032ca963ffd</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="Microsoft Exchange Security Groups">Microsoft Exchange Security Groups</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x40000000 ">0x40000000 </td>
+                                <td title=""></td>
+                                <td title="21370">21370</td>
+                                <td title="21233">21233</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:58:35">09/23/2025 00:58:35</td>
+                                <td title="09/23/2025 00:58:35">09/23/2025 00:58:35</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="9">
+                                <td>10</td>
+                                <td class="dn-cell" title="CN=Microsoft Exchange System Objects,DC=labrecon,DC=com">CN=Microsoft Exchange System Objects,DC=labrecon,DC=com</td>
+                                <td title="Microsoft Exchange System Objects">Microsoft Exchange System Objects</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="CN=Microsoft Exchange System Objects,DC=labrecon,DC=com">CN=Microsoft Exchange System Objects,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="4535486012416">4535486012416</td>
+                                <td title="Microsoft Exchange System Objects">Microsoft Exchange System Objects</td>
+                                <td title=""></td>
+                                <td title="CN=ms-Exch-System-Objects-Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=ms-Exch-System-Objects-Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | container | msExchSystemObjectsContainer">top | container | msExchSystemObjectsContainer</td>
+                                <td title="9da5920e-d6a7-4c6e-8e25-e81eb50617ba">9da5920e-d6a7-4c6e-8e25-e81eb50617ba</td>
+                                <td title=""></td>
+                                <td title="13243">13243</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title="0x40000000 ">0x40000000 </td>
+                                <td title=""></td>
+                                <td title="24216">24216</td>
+                                <td title="24213">24213</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:58:53">09/23/2025 00:58:53</td>
+                                <td title="09/23/2025 00:58:53">09/23/2025 00:58:53</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="10">
+                                <td>11</td>
+                                <td class="dn-cell" title="CN=NTDS Quotas,DC=labrecon,DC=com">CN=NTDS Quotas,DC=labrecon,DC=com</td>
+                                <td title="NTDS Quotas">NTDS Quotas</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title="Quota specifications container">Quota specifications container</td>
+                                <td title="CN=NTDS Quotas,DC=labrecon,DC=com">CN=NTDS Quotas,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="100">100</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="NTDS Quotas">NTDS Quotas</td>
+                                <td title=""></td>
+                                <td title="CN=ms-DS-Quota-Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=ms-DS-Quota-Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | msDS-QuotaContainer">top | msDS-QuotaContainer</td>
+                                <td title="cdddb672-0429-4ffc-b5c2-80d990ebfed2">cdddb672-0429-4ffc-b5c2-80d990ebfed2</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title="0x80000000 = ( DISALLOW_DELETE )">0x80000000 = ( DISALLOW_DELETE )</td>
+                                <td title=""></td>
+                                <td title="5821">5821</td>
+                                <td title="5821">5821</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="11">
+                                <td>12</td>
+                                <td class="dn-cell" title="CN=Program Data,DC=labrecon,DC=com">CN=Program Data,DC=labrecon,DC=com</td>
+                                <td title="Program Data">Program Data</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title="Default location for storage of application data.">Default location for storage of application data.</td>
+                                <td title="CN=Program Data,DC=labrecon,DC=com">CN=Program Data,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="Program Data">Program Data</td>
+                                <td title=""></td>
+                                <td title="CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | container">top | container</td>
+                                <td title="95d618aa-ddee-48c4-ac03-4d363aee62cd">95d618aa-ddee-48c4-ac03-4d363aee62cd</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="5819">5819</td>
+                                <td title="5819">5819</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="12">
+                                <td>13</td>
+                                <td class="dn-cell" title="CN=System,DC=labrecon,DC=com">CN=System,DC=labrecon,DC=com</td>
+                                <td title="System">System</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180009.0Z | 16010714223649.0Z</td>
+                                <td title=""></td>
+                                <td title="Builtin system settings">Builtin system settings</td>
+                                <td title="CN=System,DC=labrecon,DC=com">CN=System,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="System">System</td>
+                                <td title=""></td>
+                                <td title="CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | container">top | container</td>
+                                <td title="ee0be064-0f55-4c70-b9f9-f4a41ca9b59c">ee0be064-0f55-4c70-b9f9-f4a41ca9b59c</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title="0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )">0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )</td>
+                                <td title=""></td>
+                                <td title="5674">5674</td>
+                                <td title="5674">5674</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="13">
+                                <td>14</td>
+                                <td class="dn-cell" title="CN=TPM Devices,DC=labrecon,DC=com">CN=TPM Devices,DC=labrecon,DC=com</td>
+                                <td title="TPM Devices">TPM Devices</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 16010714223648.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 16010714223648.0Z</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="CN=TPM Devices,DC=labrecon,DC=com">CN=TPM Devices,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="TPM Devices">TPM Devices</td>
+                                <td title=""></td>
+                                <td title="CN=ms-TPM-Information-Objects-Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=ms-TPM-Information-Objects-Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | msTPM-InformationObjectsContainer">top | msTPM-InformationObjectsContainer</td>
+                                <td title="b3ec2e39-8a35-4059-88aa-787762acebbd">b3ec2e39-8a35-4059-88aa-787762acebbd</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="5823">5823</td>
+                                <td title="5823">5823</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="14">
+                                <td>15</td>
+                                <td class="dn-cell" title="CN=Users,DC=labrecon,DC=com">CN=Users,DC=labrecon,DC=com</td>
+                                <td title="Users">Users</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 16010714223648.0Z">20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 20250922180010.0Z | 16010714223648.0Z</td>
+                                <td title=""></td>
+                                <td title="Default container for upgraded user accounts">Default container for upgraded user accounts</td>
+                                <td title="CN=Users,DC=labrecon,DC=com">CN=Users,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0x4 = ( WRITE )">0x4 = ( WRITE )</td>
+                                <td title="TRUE">TRUE</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="Users">Users</td>
+                                <td title=""></td>
+                                <td title="CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Container,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | container">top | container</td>
+                                <td title="a323c4ae-7379-42e0-9d89-6748b1b03592">a323c4ae-7379-42e0-9d89-6748b1b03592</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="FALSE">FALSE</td>
+                                <td title=""></td>
+                                <td title="0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )">0x8c000000 = ( DISALLOW_DELETE | DOMAIN_DISALLOW_RENAME | DOMAIN_DISALLOW_MOVE )</td>
+                                <td title=""></td>
+                                <td title="5672">5672</td>
+                                <td title="5672">5672</td>
+                                <td title=""></td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                                <td title="09/23/2025 00:11:20">09/23/2025 00:11:20</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="15">
+                                <td>16</td>
+                                <td class="dn-cell" title="DC=ForestDnsZones,DC=labrecon,DC=com">DC=ForestDnsZones,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="{ V1: DsaGuid = 0120d601-02a0-423b-95be-582629b8d616 }">{ V1: DsaGuid = 0120d601-02a0-423b-95be-582629b8d616 }</td>
+                                <td title="16010101000000.0Z">16010101000000.0Z</td>
+                                <td title="ForestDnsZones">ForestDnsZones</td>
+                                <td title="Microsoft DNS Directory">Microsoft DNS Directory</td>
+                                <td title="DC=ForestDnsZones,DC=labrecon,DC=com">DC=ForestDnsZones,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0xd = ( IS_NC_HEAD | WRITE )">0xd = ( IS_NC_HEAD | WRITE )</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0">0</td>
+                                <td title=""></td>
+                                <td title="CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com">CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="ForestDnsZones">ForestDnsZones</td>
+                                <td title=""></td>
+                                <td title="CN=Domain-DNS,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Domain-DNS,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | domain | domainDNS">top | domain | domainDNS</td>
+                                <td title="1dc89136-baed-419e-9e51-97a5f0fe612c">1dc89136-baed-419e-9e51-97a5f0fe612c</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="24254">24254</td>
+                                <td title="12604">12604</td>
+                                <td title="B:32:6227F0AF1FC2410D8E3BB10615BB5B0F:CN=NTDS Quotas,DC=ForestDnsZones,DC=labrecon,DC=com | B:32:2FBAC1870ADE11D297C400C04FD8D5CD:CN=Infrastructure,DC=ForestDnsZones,DC=labrecon,DC=com | B:32:AB8153B7768811D1ADED00C04FD8D5CD:CN=LostAndFound,DC=ForestDnsZones,DC=labrecon,DC=com | B:32:18E2EA80684F11D2B9AA00C04F79F805:CN=Deleted Objects,DC=ForestDnsZones,DC=labrecon,DC=com">B:32:6227F0AF1FC2410D8E3BB10615BB5B0F:CN=NTDS Quotas,DC=ForestDnsZones,DC=labrecon,DC=com | B:32:2FBAC1870ADE11D297C400C04FD8D5CD:CN=Infrastructure,DC=ForestDnsZones,DC=labrecon,DC=com | B:32:AB8153B7768811D1ADED00C04FD8D5CD:CN=LostAndFound,DC=ForestDnsZones,DC=labrecon,DC=com | B:32:18E2EA80684F11D2B9AA00C04F79F805:CN=Deleted Objects,DC=ForestDnsZones,DC=labrecon,DC=com</td>
+                                <td title="09/23/2025 01:12:25">09/23/2025 01:12:25</td>
+                                <td title="09/23/2025 00:21:04">09/23/2025 00:21:04</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="16">
+                                <td>17</td>
+                                <td class="dn-cell" title="DC=DomainDnsZones,DC=labrecon,DC=com">DC=DomainDnsZones,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="{ V1: DsaGuid = 0120d601-02a0-423b-95be-582629b8d616 }">{ V1: DsaGuid = 0120d601-02a0-423b-95be-582629b8d616 }</td>
+                                <td title="16010101000000.0Z">16010101000000.0Z</td>
+                                <td title="DomainDnsZones">DomainDnsZones</td>
+                                <td title="Microsoft DNS Directory">Microsoft DNS Directory</td>
+                                <td title="DC=DomainDnsZones,DC=labrecon,DC=com">DC=DomainDnsZones,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0xd = ( IS_NC_HEAD | WRITE )">0xd = ( IS_NC_HEAD | WRITE )</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0">0</td>
+                                <td title=""></td>
+                                <td title="CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com">CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="DomainDnsZones">DomainDnsZones</td>
+                                <td title=""></td>
+                                <td title="CN=Domain-DNS,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Domain-DNS,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | domain | domainDNS">top | domain | domainDNS</td>
+                                <td title="a4a84875-4c9b-4dfc-8330-ae39123192c8">a4a84875-4c9b-4dfc-8330-ae39123192c8</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="24253">24253</td>
+                                <td title="12582">12582</td>
+                                <td title="B:32:6227F0AF1FC2410D8E3BB10615BB5B0F:CN=NTDS Quotas,DC=DomainDnsZones,DC=labrecon,DC=com | B:32:2FBAC1870ADE11D297C400C04FD8D5CD:CN=Infrastructure,DC=DomainDnsZones,DC=labrecon,DC=com | B:32:AB8153B7768811D1ADED00C04FD8D5CD:CN=LostAndFound,DC=DomainDnsZones,DC=labrecon,DC=com | B:32:18E2EA80684F11D2B9AA00C04F79F805:CN=Deleted Objects,DC=DomainDnsZones,DC=labrecon,DC=com">B:32:6227F0AF1FC2410D8E3BB10615BB5B0F:CN=NTDS Quotas,DC=DomainDnsZones,DC=labrecon,DC=com | B:32:2FBAC1870ADE11D297C400C04FD8D5CD:CN=Infrastructure,DC=DomainDnsZones,DC=labrecon,DC=com | B:32:AB8153B7768811D1ADED00C04FD8D5CD:CN=LostAndFound,DC=DomainDnsZones,DC=labrecon,DC=com | B:32:18E2EA80684F11D2B9AA00C04F79F805:CN=Deleted Objects,DC=DomainDnsZones,DC=labrecon,DC=com</td>
+                                <td title="09/23/2025 01:12:25">09/23/2025 01:12:25</td>
+                                <td title="09/23/2025 00:21:04">09/23/2025 00:21:04</td>
+                            </tr>
+                            <tr data-type="unknown" data-index="17">
+                                <td>18</td>
+                                <td class="dn-cell" title="CN=Configuration,DC=labrecon,DC=com">CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="Configuration">Configuration</td>
+                                <td title=""></td>
+                                <td title="{ V1: DsaGuid = 0120d601-02a0-423b-95be-582629b8d616 }">{ V1: DsaGuid = 0120d601-02a0-423b-95be-582629b8d616 }</td>
+                                <td title="16010101000000.0Z">16010101000000.0Z</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="CN=Configuration,DC=labrecon,DC=com">CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0xd = ( IS_NC_HEAD | WRITE )">0xd = ( IS_NC_HEAD | WRITE )</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com">CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="0">0</td>
+                                <td title=""></td>
+                                <td title="CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com">CN=NTDS Settings,CN=SERVER,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="Configuration">Configuration</td>
+                                <td title=""></td>
+                                <td title="CN=Configuration,CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Configuration,CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="top | configuration">top | configuration</td>
+                                <td title="fb42b75f-1e78-4254-8de6-93ec71996a0b">fb42b75f-1e78-4254-8de6-93ec71996a0b</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="TRUE">TRUE</td>
+                                <td title="CN=Schema,CN=Configuration,DC=labrecon,DC=com">CN=Schema,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title=""></td>
+                                <td title=""></td>
+                                <td title="24251">24251</td>
+                                <td title="4101">4101</td>
+                                <td title="B:32:6227F0AF1FC2410D8E3BB10615BB5B0F:CN=NTDS Quotas,CN=Configuration,DC=labrecon,DC=com | B:32:AB8153B7768811D1ADED00C04FD8D5CD:CN=LostAndFoundConfig,CN=Configuration,DC=labrecon,DC=com | B:32:18E2EA80684F11D2B9AA00C04F79F805:CN=Deleted Objects,CN=Configuration,DC=labrecon,DC=com">B:32:6227F0AF1FC2410D8E3BB10615BB5B0F:CN=NTDS Quotas,CN=Configuration,DC=labrecon,DC=com | B:32:AB8153B7768811D1ADED00C04FD8D5CD:CN=LostAndFoundConfig,CN=Configuration,DC=labrecon,DC=com | B:32:18E2EA80684F11D2B9AA00C04F79F805:CN=Deleted Objects,CN=Configuration,DC=labrecon,DC=com</td>
+                                <td title="09/23/2025 01:12:25">09/23/2025 01:12:25</td>
+                                <td title="09/23/2025 00:11:13">09/23/2025 00:11:13</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="no-results" id="noResults">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3>No results found</h3>
+                        <p>Try adjusting your search or filter</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const table = document.getElementById('dataTable');
+        const tbody = table.querySelector('tbody');
+        const noResults = document.getElementById('noResults');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const visibleCount = document.getElementById('visibleCount');
+        const selectedCount = document.getElementById('selectedCount');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let currentSort = { column: null, direction: 'asc' };
+        let selectedRows = new Set();
+        function updateDisplay() {
+            let visibleRows = 0;
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const type = row.dataset.type;
+                const matchesSearch = currentSearch === '' || text.includes(currentSearch);
+                const matchesFilter = currentFilter === 'all' || type === currentFilter;
+                if (matchesSearch && matchesFilter) {
+                    row.style.display = '';
+                    visibleRows++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            visibleCount.textContent = visibleRows;
+            if (visibleRows === 0) {
+                table.style.display = 'none';
+                noResults.style.display = 'block';
+            } else {
+                table.style.display = 'table';
+                noResults.style.display = 'none';
+            }
+        }
+        searchInput.addEventListener('input', function() {
+            currentSearch = this.value.toLowerCase();
+            updateDisplay();
+        });
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                updateDisplay();
+            });
+        });
+        document.querySelectorAll('th.sortable').forEach((th, index) => {
+            th.addEventListener('click', function() {
+                const column = parseInt(this.dataset.column) || index;
+                if (currentSort.column === column) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.column = column;
+                    currentSort.direction = 'asc';
+                }
+                document.querySelectorAll('th.sortable').forEach(h => {
+                    h.classList.remove('sort-asc', 'sort-desc');
+                });
+                this.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+                const visibleRows = rows.filter(r => r.style.display !== 'none');
+                visibleRows.sort((a, b) => {
+                    const aVal = a.cells[column].textContent.trim();
+                    const bVal = b.cells[column].textContent.trim();
+                    const comparison = aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: 'base' });
+                    return currentSort.direction === 'asc' ? comparison : -comparison;
+                });
+                visibleRows.forEach(row => tbody.appendChild(row));
+            });
+        });
+        tbody.addEventListener('click', function(e) {
+            if (e.target.classList.contains('dn-cell')) {
+                const dn = e.target.getAttribute('title');
+                navigator.clipboard.writeText(dn).then(() => {
+                    const original = e.target.textContent;
+                    e.target.textContent = '? Copied!';
+                    e.target.style.color = '#48bb78';
+                    setTimeout(() => {
+                        e.target.textContent = original;
+                        e.target.style.color = '';
+                    }, 1500);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    alert('Failed to copy to clipboard');
+                });
+            }
+        });
+        tbody.addEventListener('click', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                const row = e.target.closest('tr');
+                if (row) {
+                    const index = row.dataset.index;
+                    if (selectedRows.has(index)) {
+                        selectedRows.delete(index);
+                        row.style.background = '';
+                    } else {
+                        selectedRows.add(index);
+                        row.style.background = '#e6f7ff';
+                    }
+                    selectedCount.textContent = selectedRows.size;
+                }
+            }
+        });
+        function exportToCSV() {
+            const visibleRows = Array.from(tbody.querySelectorAll('tr')).filter(r => r.style.display !== 'none');
+            if (visibleRows.length === 0) {
+                alert('No visible rows to export');
+                return;
+            }
+            let csv = '';
+            const headers = Array.from(document.querySelectorAll('th')).map(th => th.textContent.trim());
+            csv += headers.map(h => '"' + h.replace(/"/g, '""') + '"').join(',') + '\n';
+            visibleRows.forEach(row => {
+                const values = Array.from(row.cells).map(cell => {
+                    const val = cell.getAttribute('title') || cell.textContent.trim();
+                    return '"' + val.replace(/"/g, '""') + '"';
+                });
+                csv += values.join(',') + '\n';
+            });
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'ldap_export_' + new Date().toISOString().split('T')[0] + '.csv';
+            link.click();
+        }
+        function exportToJSON() {
+            const visibleRows = Array.from(tbody.querySelectorAll('tr')).filter(r => r.style.display !== 'none');
+            if (visibleRows.length === 0) {
+                alert('No visible rows to export');
+                return;
+            }
+            const headers = Array.from(document.querySelectorAll('th')).map(th => th.textContent.trim());
+            const data = visibleRows.map(row => {
+                const obj = {};
+                Array.from(row.cells).forEach((cell, i) => {
+                    obj[headers[i]] = cell.getAttribute('title') || cell.textContent.trim();
+                });
+                return obj;
+            });
+            const json = JSON.stringify({ entries: data }, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'ldap_export_' + new Date().toISOString().split('T')[0] + '.json';
+            link.click();
+        }
+        function copySelected() {
+            if (selectedRows.size === 0) {
+                alert('No rows selected. Use Ctrl+Click to select rows.');
+                return;
+            }
+            const headers = Array.from(document.querySelectorAll('th')).map(th => th.textContent.trim());
+            let text = headers.join('\t') + '\n';
+            selectedRows.forEach(index => {
+                const row = tbody.querySelector(`tr[data-index="${index}"]`);
+                if (row) {
+                    const values = Array.from(row.cells).map(cell => 
+                        cell.getAttribute('title') || cell.textContent.trim()
+                    );
+                    text += values.join('\t') + '\n';
+                }
+            });
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Selected rows copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a' && document.activeElement === document.body) {
+                e.preventDefault();
+                const visibleRows = Array.from(tbody.querySelectorAll('tr')).filter(r => r.style.display !== 'none');
+                visibleRows.forEach(row => {
+                    const index = row.dataset.index;
+                    selectedRows.add(index);
+                    row.style.background = '#e6f7ff';
+                });
+                selectedCount.textContent = selectedRows.size;
+            }
+            if (e.key === 'Escape') {
+                selectedRows.forEach(index => {
+                    const row = tbody.querySelector(`tr[data-index="${index}"]`);
+                    if (row) row.style.background = '';
+                });
+                selectedRows.clear();
+                selectedCount.textContent = '0';
+                searchInput.value = '';
+                currentSearch = '';
+                updateDisplay();
+            }
+        });
+        console.log('LDAP Query Tool initialized');
+        console.log('Total entries:', rows.length);
+        console.log('Keyboard shortcuts:');
+        console.log('  Ctrl+F: Focus search');
+        console.log('  Ctrl+Click: Select rows');
+        console.log('  Ctrl+A: Select all visible');
+        console.log('  Escape: Clear selection');
+    </script>
+</body>
+</html>
